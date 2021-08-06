@@ -5,6 +5,7 @@ import price from "../js/price"
 import { base_url } from "../js/config"
 import axios from "axios"
 import deleteTransaction from "../js/deleteTransaction"
+import { Prompt } from "react-router"
 
 export class transaction extends Component {
 	constructor() {
@@ -15,6 +16,7 @@ export class transaction extends Component {
 			phone: "",
 			products: [],
 			message: "",
+			unChange: false,
 		}
 	}
 	getData = () => {
@@ -56,6 +58,7 @@ export class transaction extends Component {
 		if (tempProducts[index].product_id && type != "amount") {
 			tempProducts[index].product_id = null
 		}
+		this.setUnChange()
 		this.saveProducts(tempProducts)
 	}
 	selectItem = (item, index) => {
@@ -115,6 +118,7 @@ export class transaction extends Component {
 		if (key === "name") data.name = value
 		else if (key === "address") data.address = value
 		else if (key === "phone") data.phone = value
+		this.setUnChange()
 		this.saveCustomer(data)
 	}
 	totalPrice = () => {
@@ -188,12 +192,21 @@ export class transaction extends Component {
 			localStorage.removeItem("products")
 		}
 	}
+	setUnChange = () => {
+		if (this.props.transactionId) {
+			this.setState({ unChange: true })
+		}
+	}
 	componentDidMount() {
 		this.getData()
 	}
 	render() {
 		return (
 			<div>
+				<Prompt
+					when={this.state.unChange}
+					message='Data Belum Di Simpan, Yakin Ingin Meninggalkan Halaman Ini?'
+				/>
 				<Navbar active='1' />
 				<h3 className='text-bold text-info mt-2 ml-5'>Transaksi</h3>
 				<div className='container'>
@@ -372,19 +385,22 @@ export class transaction extends Component {
 							</tr>
 						</tbody>
 					</table>
-					<div className='row justify-content-around'>
+					<div className='row justify-content-around mt-4'>
 						<div className='col-3 d-flex justify-content-center'>
 							<button
 								type='button'
-								class='btn btn-info'
+								class='btn btn-secondary'
 								onClick={() => this.saveTransaction()}
 							>
 								Simpan
+								<img
+									src={process.env.PUBLIC_URL + "/save.svg"}
+									alt='trash'
+									style={{ objectFit: "cover" }}
+									className='ml-2'
+								/>
 							</button>
 						</div>
-						{/* {(() => {
-							if (this.props.transactionId) {
-								return ( */}
 						<div className='col-3 d-flex justify-content-center'>
 							<button
 								type='button'
@@ -407,12 +423,15 @@ export class transaction extends Component {
 								/>
 							</button>
 						</div>
-						{/* )
-							}
-						})()} */}
 						<div className='col-3 d-flex justify-content-center'>
-							<button type='button' class='btn btn-secondary'>
-								Info
+							<button type='button' class='btn btn-info'>
+								Simpan Dan Cetak
+								<img
+									src={process.env.PUBLIC_URL + "/printer.svg"}
+									alt='trash'
+									style={{ objectFit: "cover" }}
+									className='ml-2'
+								/>
 							</button>
 						</div>
 					</div>
