@@ -168,7 +168,7 @@ export class price_list extends Component {
 							<div className='col-4'>
 								<Card
 									name={item.name}
-									price={price(item.price)}
+									price={price(item.price.toString())}
 									image={item.image[0] ? item.image[0] : "../no_data.svg"}
 									details={() => (window.location = "/product/" + item._id)}
 								/>

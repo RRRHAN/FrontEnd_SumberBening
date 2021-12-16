@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 
 import Transaction from "../pages/transaction.jsx"
 
-function GettransactionId() {
+function TransactionId() {
 	const { id } = useParams()
 
 	return (
@@ -13,4 +13,4 @@ function GettransactionId() {
 	)
 }
 
-export default GettransactionId
+export default TransactionId

@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React, { Component, useEffect } from "react"
 import Navbar from "../components/navbar"
 import HiddenInput from "../components/hiddenInput"
 import price from "../js/price"
@@ -6,7 +6,21 @@ import { base_url } from "../js/config"
 import axios from "axios"
 import deleteTransaction from "../js/deleteTransaction"
 import { Prompt } from "react-router"
+import $ from "jquery"
 
+const printReceiptOfPayment = async (transactionId) => {
+	const iframe = document.frames
+		? document.frames["receiptOfPayment"]
+		: document.getElementById("receiptOfPayment")
+	// await iframe.setAttribute("src", `/receiptOfPayment.html?id=${transactionId}`)
+	console.log(iframe)
+	const iframeWindow = iframe.contentWindow || iframe
+
+	iframe.focus()
+	iframeWindow.print()
+
+	return false
+}
 export class transaction extends Component {
 	constructor() {
 		super()
@@ -16,7 +30,9 @@ export class transaction extends Component {
 			phone: "",
 			products: [],
 			message: "",
-			unChange: false,
+			change: false,
+			transactionId: "",
+			print: false,
 		}
 	}
 	getData = () => {
@@ -38,7 +54,7 @@ export class transaction extends Component {
 			if (products != "[]" && products != undefined) {
 				this.setState({ products: JSON.parse(localStorage.products) })
 			} else {
-				this.setState({ products: [{ name: "", price: 0, amount: 0 }] })
+				this.setState({ products: [{ name: "", price: 0, amount: 1 }] })
 			}
 			const customer = localStorage.customer
 			if (customer != "{}" && customer != undefined) {
@@ -53,12 +69,12 @@ export class transaction extends Component {
 		} else if (type === "amount") {
 			tempProducts[index].amount = value
 		} else if (type === "price") {
-			tempProducts[index].price = value
+			tempProducts[index].price = Number(value)
 		}
 		if (tempProducts[index].product_id && type != "amount") {
 			tempProducts[index].product_id = null
 		}
-		this.setUnChange()
+		this.setchange()
 		this.saveProducts(tempProducts)
 	}
 	selectItem = (item, index) => {
@@ -82,7 +98,7 @@ export class transaction extends Component {
 			let tempProducts = this.state.products
 			tempProducts.splice(index, 1)
 			if (tempProducts.length === 0) {
-				tempProducts.push({ name: "", price: 0, amount: 0 })
+				tempProducts.push({ name: "", price: 0, amount: 1 })
 			}
 			this.saveProducts(tempProducts)
 		}
@@ -96,7 +112,10 @@ export class transaction extends Component {
 	amount = (operation, index) => {
 		let tempProducts = this.state.products
 		if (operation === "increment") tempProducts[index].amount++
-		else if (operation === "decrement") tempProducts[index].amount--
+		else if (operation === "increment" && tempProducts[index].amount <= 0)
+			tempProducts[index].amount = 1
+		else if (operation === "decrement" && tempProducts[index].amount >= 2)
+			tempProducts[index].amount--
 		this.saveProducts(tempProducts)
 	}
 	saveCustomer = (customer) => {
@@ -118,7 +137,7 @@ export class transaction extends Component {
 		if (key === "name") data.name = value
 		else if (key === "address") data.address = value
 		else if (key === "phone") data.phone = value
-		this.setUnChange()
+		this.setchange()
 		this.saveCustomer(data)
 	}
 	totalPrice = () => {
@@ -130,10 +149,10 @@ export class transaction extends Component {
 	}
 	addNewRow = () => {
 		let tempProducts = this.state.products
-		tempProducts.push({ name: "", price: 0, amount: 0 })
+		tempProducts.push({ name: "", price: 0, amount: 1 })
 		this.saveProducts(tempProducts)
 	}
-	saveTransaction = () => {
+	saveTransaction = (print) => {
 		let data = {
 				name: this.state.name,
 				address: this.state.address,
@@ -150,6 +169,8 @@ export class transaction extends Component {
 						message: response.data.message,
 					})
 					this.getData()
+					if (print) this.print()
+					this.setState({ change: false })
 				})
 				.catch((error) => {
 					console.error(error)
@@ -167,6 +188,7 @@ export class transaction extends Component {
 					})
 					localStorage.removeItem("customer")
 					localStorage.removeItem("products")
+					if (print) this.print(response.data.data._id)
 				})
 				.catch((error) => {
 					console.error(error)
@@ -192,19 +214,47 @@ export class transaction extends Component {
 			localStorage.removeItem("products")
 		}
 	}
-	setUnChange = () => {
+	setchange = () => {
 		if (this.props.transactionId) {
-			this.setState({ unChange: true })
+			this.setState({ change: true })
 		}
 	}
-	componentDidMount() {
-		this.getData()
+	print = async (transactionId) => {
+		if (transactionId) await this.setState({ transactionId })
+		this.setState({ print: true })
 	}
+	componentDidMount() {
+		window.onmessage = (event) => {
+			if (event.data === "afterprint") {
+				this.setState({ print: false })
+			} else if (event.data === "documentReady") {
+				printReceiptOfPayment()
+			}
+		}
+		this.getData()
+		if (this.props.transactionId)
+			this.setState({ transactionId: this.props.transactionId })
+	}
+
 	render() {
+		console.log(-1 < 0)
 		return (
-			<div>
+			<div className='mb-3'>
+				{(() => {
+					if (this.state.print) {
+						return (
+							<iframe
+								id='receiptOfPayment'
+								src={`${process.env.PUBLIC_URL}/receiptOfPayment.html?id=${this.state.transactionId}`}
+								style={{ display: "none" }}
+								title='Receipt'
+							/>
+						)
+					}
+				})()}
+
 				<Prompt
-					when={this.state.unChange}
+					when={this.state.change}
 					message='Data Belum Di Simpan, Yakin Ingin Meninggalkan Halaman Ini?'
 				/>
 				<Navbar active='1' />
@@ -240,7 +290,7 @@ export class transaction extends Component {
 						<div className='col-4'>
 							<div class='input-group mb-3'>
 								<div class='input-group-prepend'>
-									<span class='input-group-text'>Nama</span>
+									<span class='input-group-text'>Name</span>
 								</div>
 								<input
 									type='text'
@@ -341,21 +391,19 @@ export class transaction extends Component {
 									</td>
 									<td>
 										<HiddenInput
-											type='number'
+											type='text'
 											col='price'
-											value={price(item.price == 0 ? "" : item.price)}
+											value={price(item.price.toString())}
 											change={(ev) =>
-												this.setProducts(ev.target.value, "price", index)
+												this.setProducts(
+													price(ev.target.value, true),
+													"price",
+													index
+												)
 											}
 										/>
 									</td>
-									<td>
-										{price(
-											item.amount * item.price == 0
-												? ""
-												: item.amount * item.price
-										)}
-									</td>
+									<td>{price((item.amount * item.price).toString())}</td>
 								</tr>
 							))}
 							<tr>
@@ -364,7 +412,7 @@ export class transaction extends Component {
 										<button
 											className='btn btn-success btn-lg p-1'
 											onClick={() => this.addNewRow()}
-											title='Hapus Baris Ini'
+											title='Tambah Baris'
 										>
 											Tambah Baris{" "}
 											<img
@@ -380,7 +428,7 @@ export class transaction extends Component {
 									<strong>JUMLAH</strong>
 								</td>
 								<td>
-									<strong>{price(this.totalPrice())}</strong>
+									<strong>{price(this.totalPrice().toString())}</strong>
 								</td>
 							</tr>
 						</tbody>
@@ -390,7 +438,7 @@ export class transaction extends Component {
 							<button
 								type='button'
 								class='btn btn-secondary'
-								onClick={() => this.saveTransaction()}
+								onClick={() => this.saveTransaction(false)}
 							>
 								Simpan
 								<img
@@ -424,7 +472,11 @@ export class transaction extends Component {
 							</button>
 						</div>
 						<div className='col-3 d-flex justify-content-center'>
-							<button type='button' class='btn btn-info'>
+							<button
+								type='button'
+								class='btn btn-info'
+								onClick={() => this.saveTransaction(true)}
+							>
 								Simpan Dan Cetak
 								<img
 									src={process.env.PUBLIC_URL + "/printer.svg"}

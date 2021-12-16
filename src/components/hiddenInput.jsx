@@ -80,6 +80,7 @@ export class hiddenInput extends Component {
 								this.setState({ change: false })
 							}
 						}}
+						min={this.props.col === "amount" ? "1" : ""}
 						onKeyDown={(ev) => this.getSuggestion(ev)}
 						onKeyUp={(ev) => {
 							this.getProducts(ev.target.value)

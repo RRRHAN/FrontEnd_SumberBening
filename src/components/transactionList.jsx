@@ -109,7 +109,9 @@ export class transactionsList extends Component {
 							</div>
 							<div className='mt-2'>
 								<small className='text-info'>Total Amount</small>
-								<h6 className='text-danger'>Rp {price(this.totalPrice())}</h6>
+								<h6 className='text-danger'>
+									Rp {price(this.totalPrice().toString())}
+								</h6>
 							</div>
 						</div>
 					</div>

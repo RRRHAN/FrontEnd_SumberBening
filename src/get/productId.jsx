@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 
 import Product from "../pages/product.jsx"
 
-function GetProductId() {
+function ProductId() {
 	const { id } = useParams()
 
 	return (
@@ -13,4 +13,4 @@ function GetProductId() {
 	)
 }
 
-export default GetProductId
+export default ProductId

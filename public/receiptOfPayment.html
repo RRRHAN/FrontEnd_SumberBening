@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Print</title>
+    <link rel="stylesheet" href="receiptOfPayment.css" />
+    <script src="qrcode.min.js"></script>
+</head>
+
+<body>
+    <div id="container">
+        <center>
+            <img src="SumberBeningLogo.svg" alt="logo" id="logo" />
+            <div id="title">
+                <h3>TOKO BANGUNAN</h3>
+                <h3>"SUMBER BENING"</h3>
+            </div>
+            <div id="storeInformation">
+                <small>Jl. Raya Randu Agung No. 2</small>
+                <small>Singosari - Kab. Malang</small>
+                <small>Telp : (0341) 451309</small>
+                <small>WA : 089608561118</small>
+            </div>
+            <div id="description">
+                <hr class="separator" />
+                <small id="dateTime">
+						<!-- datetime -->
+						<!-- example -->
+						<!-- 23/08/2021 09:12:15 -->
+					</small>
+                <hr class="separator" />
+            </div>
+            <div id="content">
+                <table>
+                    <thead>
+                        <tr>
+                            <td>Nama barang</td>
+                            <td>Qty</td>
+                            <td>Harga</td>
+                            <td>Total</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- product list -->
+                        <!-- example -->
+                        <!-- <tr>
+                            <td>product item</td>
+                            <td>product amount</td>
+                            <td>product price</td>
+                            <td>product total amount</td>
+                        </tr> -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2"></td>
+                            <td colspan="2" style="height: 1px">
+                                <hr class="separator" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td colspan="2" style="text-align: end">
+                                <strong>TOTAL : </strong>
+                            </td>
+                            <td>
+                                <strong id="totalPrice">
+										<!-- Total Price -->
+									</strong>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div id="footer">
+                <hr class="separator" />
+                <h4>TERIMA KASIH</h4>
+                <p>Atas Pembelian Anda</p>
+                <hr class="separator" />
+            </div>
+            <div id="transactionId">
+                <div id="qrcode"></div>
+                <p></p>
+            </div>
+        </center>
+    </div>
+    <script src="receiptOfPayment.js"></script>
+</body>
+
+</html>

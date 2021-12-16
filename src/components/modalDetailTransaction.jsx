@@ -128,10 +128,10 @@ export class modalDetailTransaction extends Component {
 										<tr>
 											<td>{`${index + 1}`}</td>
 											<td>{item.name}</td>
-											<td>Rp {item.price}</td>
+											<td>Rp {price(item.price.toString())}</td>
 											<td>{item.amount}</td>
 											<td className='text-right'>
-												Rp {item.price * item.amount}
+												Rp {price((item.price * item.amount).toString())}
 											</td>
 										</tr>
 									))}
@@ -140,7 +140,7 @@ export class modalDetailTransaction extends Component {
 											<h4>Total</h4>
 										</td>
 										<td className='text-right text-danger text-bold'>
-											<h4>Rp {price(this.totalPrice())}</h4>
+											<h4>Rp {price(this.totalPrice().toString())}</h4>
 										</td>
 									</tr>
 								</tbody>

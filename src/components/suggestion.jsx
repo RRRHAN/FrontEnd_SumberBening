@@ -33,7 +33,7 @@ export class Suggestion extends Component {
 				</div>
 				<div className='col-10 ml-4'>
 					<p className='d-block m-0'>{this.props.name}</p>
-					<sub>Rp. {price(this.props.price)}</sub>
+					<sub>Rp. {price(this.props.price.toString())}</sub>
 				</div>
 			</div>
 		)

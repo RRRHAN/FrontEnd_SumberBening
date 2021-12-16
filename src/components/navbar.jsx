@@ -11,7 +11,7 @@ export class navbar extends Component {
 			<nav class='navbar navbar-dark bg-dark navbar-expand-lg'>
 				<a class='navbar-brand' href='#'>
 					<img
-						src='/logo512.png'
+						src={process.env.PUBLIC_URL + "/SumberBeningWhiteLogo.svg"}
 						width='30'
 						height='30'
 						class='d-inline-block align-top mr-3'
