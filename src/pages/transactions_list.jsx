@@ -75,6 +75,7 @@ export class transaction_list extends Component {
 	componentDidMount() {
 		this.getTransaction()
 		this.getMessage()
+		document.title = 'List Transaksi'
 	}
 
 	render() {

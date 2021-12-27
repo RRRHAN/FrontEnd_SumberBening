@@ -24,6 +24,7 @@ export class price_list extends Component {
 			images_name: [],
 			// numberOfFiles: 1,
 		}
+		console.log(process.env,base_url)
 	}
 	getMessage = () => {
 		const message = sessionStorage.getItem("message")
@@ -88,6 +89,7 @@ export class price_list extends Component {
 	componentDidMount() {
 		this.getProducts()
 		this.getMessage()
+		document.title = 'List Produk'
 	}
 	render() {
 		return (
@@ -170,7 +172,13 @@ export class price_list extends Component {
 									name={item.name}
 									price={price(item.price.toString())}
 									image={item.image[0] ? item.image[0] : "../no_data.svg"}
-									details={() => (window.location = "/product/" + item._id)}
+									details={() => {
+										if(process.env.REACT_APP_ROUTER === "Hash"){
+											window.location = `?id=${item._id}#/product`
+										}else{
+											window.location = `/product?id=${item._id}`
+										}
+									}}
 								/>
 							</div>
 						))}

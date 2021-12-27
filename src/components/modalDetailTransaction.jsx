@@ -1,6 +1,7 @@
 import React, { Component } from "react"
 import price from "../js/price"
 import deleteTransaction from "../js/deleteTransaction"
+import $ from 'jquery'
 
 export class modalDetailTransaction extends Component {
 	convertTime = (time) => {
@@ -97,9 +98,14 @@ export class modalDetailTransaction extends Component {
 										<button
 											type='button'
 											class='btn btn-info'
-											onClick={() =>
-												(window.location = `/transaction/${this.props.transaction._id}`)
-											}
+											onClick={() =>{
+												$("#modalDetail").modal("hide")
+												if(process.env.REACT_APP_ROUTER === "Hash"){
+													window.location = `?id=${this.props.transaction._id}#/transaction`
+												}else{
+													window.location = `/transaction?id=${this.props.transaction._id}`
+												}
+											}}
 										>
 											Ubah Data{" "}
 											<img

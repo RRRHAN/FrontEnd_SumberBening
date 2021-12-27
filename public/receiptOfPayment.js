@@ -1,6 +1,6 @@
 // send massage to parent window after prnting or cancel printing
 window.onafterprint = () => {
-    window.parent.postMessage("afterprint")
+    window.parent.postMessage("afterprint", '*')
 }
 
 // function to get parameter from URL
@@ -98,5 +98,8 @@ setReceipt = (transactionData) => {
 	}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 
     // send message when document is ready to print
-    window.parent.postMessage("documentReady")
+    window.parent.postMessage("documentReady", '*')
+    if (getParameter("print") == 'true') {
+        window.print()
+    }
 }

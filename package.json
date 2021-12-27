@@ -3,9 +3,9 @@
     "version": "0.1.0",
     "author": "Raihan Firmansyah",
     "private": true,
-    "homepage": "./",
+    "homepage": ".",
     "description": "Sumber Bening web and desktop App",
-    "main": "build/electron.js",
+    "main": "electron.js",
     "dependencies": {
         "@testing-library/jest-dom": "^5.11.10",
         "@testing-library/react": "^11.2.6",
@@ -24,7 +24,8 @@
         "web-vitals": "^1.1.1"
     },
     "scripts": {
-        "start": "react-scripts start",
+        "start": "cross-env REACT_APP_ROUTER=Browser react-scripts start",
+        "start:hash": "set PORT=3131 && react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
@@ -54,6 +55,7 @@
         "cross-env": "^7.0.3",
         "electron": "^13.1.9",
         "electron-builder": "^22.11.7",
+        "react-snapshot": "^1.3.0",
         "wait-on": "^6.0.0"
     },
     "build": {

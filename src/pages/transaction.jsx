@@ -2,25 +2,25 @@ import React, { Component, useEffect } from "react"
 import Navbar from "../components/navbar"
 import HiddenInput from "../components/hiddenInput"
 import price from "../js/price"
+import printReceiptOfPayment from "../js/printReceiptOfPayment"
+import getParameter from "../js/getParameter"
 import { base_url } from "../js/config"
 import axios from "axios"
 import deleteTransaction from "../js/deleteTransaction"
 import { Prompt } from "react-router"
 import $ from "jquery"
 
-const printReceiptOfPayment = async (transactionId) => {
-	const iframe = document.frames
-		? document.frames["receiptOfPayment"]
-		: document.getElementById("receiptOfPayment")
-	// await iframe.setAttribute("src", `/receiptOfPayment.html?id=${transactionId}`)
-	console.log(iframe)
-	const iframeWindow = iframe.contentWindow || iframe
+// const printReceiptOfPayment = async () => {
+// 	const iframe = document.frames
+// 		? document.frames["receiptOfPayment"]
+// 		: document.getElementById("receiptOfPayment")
+// 	const iframeWindow = iframe.contentWindow || iframe
 
-	iframe.focus()
-	iframeWindow.print()
+// 	iframe.focus()
+// 	iframeWindow.print()
 
-	return false
-}
+// 	return false
+// }
 export class transaction extends Component {
 	constructor() {
 		super()
@@ -31,13 +31,13 @@ export class transaction extends Component {
 			products: [],
 			message: "",
 			change: false,
-			transactionId: "",
+			transactionId: getParameter('id'),
 			print: false,
 		}
 	}
 	getData = () => {
-		if (this.props.transactionId) {
-			let url = `${base_url}/transaction/${this.props.transactionId}`
+		if (this.state.transactionId) {
+			let url = `${base_url}/transaction/${this.state.transactionId}`
 			axios
 				.get(url)
 				.then((response) => {
@@ -105,7 +105,7 @@ export class transaction extends Component {
 	}
 	saveProducts = (products) => {
 		this.setState({ products })
-		if (!this.props.transactionId) {
+		if (!this.state.transactionId) {
 			localStorage.products = JSON.stringify(products)
 		}
 	}
@@ -124,7 +124,7 @@ export class transaction extends Component {
 			address: customer.address,
 			phone: customer.phone,
 		})
-		if (!this.props.transactionId) {
+		if (!this.state.transactionId) {
 			localStorage.customer = JSON.stringify(customer)
 		}
 	}
@@ -160,8 +160,8 @@ export class transaction extends Component {
 				products: JSON.stringify(this.state.products),
 			},
 			url = base_url + "/transaction"
-		if (this.props.transactionId) {
-			data.transaction_id = this.props.transactionId
+		if (this.state.transactionId) {
+			data.transaction_id = this.state.transactionId
 			axios
 				.put(url, data)
 				.then((response) => {
@@ -196,8 +196,8 @@ export class transaction extends Component {
 		}
 	}
 	deleteTransaction = async () => {
-		if (this.props.transactionId) {
-			deleteTransaction(this.props.transactionId)
+		if (this.state.transactionId) {
+			deleteTransaction(this.state.transactionId)
 				.then((response) => {
 					sessionStorage.message = response.data.message
 					window.location = "/transactionList"
@@ -215,7 +215,7 @@ export class transaction extends Component {
 		}
 	}
 	setchange = () => {
-		if (this.props.transactionId) {
+		if (this.state.transactionId) {
 			this.setState({ change: true })
 		}
 	}
@@ -224,6 +224,7 @@ export class transaction extends Component {
 		this.setState({ print: true })
 	}
 	componentDidMount() {
+		console.log(this.state.transactionId)
 		window.onmessage = (event) => {
 			if (event.data === "afterprint") {
 				this.setState({ print: false })
@@ -232,12 +233,13 @@ export class transaction extends Component {
 			}
 		}
 		this.getData()
-		if (this.props.transactionId)
-			this.setState({ transactionId: this.props.transactionId })
+		if (this.state.transactionId)
+			this.setState({ transactionId: this.state.transactionId })
+		document.title = 'Transaksi'
 	}
 
 	render() {
-		console.log(-1 < 0)
+		console.log(process.env.NODE_ENV)
 		return (
 			<div className='mb-3'>
 				{(() => {
@@ -245,9 +247,10 @@ export class transaction extends Component {
 						return (
 							<iframe
 								id='receiptOfPayment'
-								src={`${process.env.PUBLIC_URL}/receiptOfPayment.html?id=${this.state.transactionId}`}
+								src={`${process.env.PUBLIC_URL}/receiptOfPayment.html?id=${this.state.transactionId}&print=${process.env.NODE_ENV == 'production'}`}
 								style={{ display: "none" }}
 								title='Receipt'
+								onLoad={()=>console.log('print',this.state.print)}
 							/>
 						)
 					}

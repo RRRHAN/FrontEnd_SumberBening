@@ -27,9 +27,16 @@ export class navbar extends Component {
 							</Link>
 						</li>
 						<li className='nav-item'>
-							<Link to='/transaction' className='nav-link'>
-								Transaksi
-							</Link>
+							<a
+								href={(() => {
+									if (process.env.REACT_APP_ROUTER === "Hash") {
+										return `?id=#/transaction`
+									} else {
+										return `/transaction`
+									}
+								})()}
+								className='nav-link'
+							>Transaksi</a>
 						</li>
 						<li className='nav-item'>
 							<Link to='/transactionList' className='nav-link'>

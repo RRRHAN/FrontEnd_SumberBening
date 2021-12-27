@@ -4,6 +4,7 @@ import $, { error } from "jquery"
 import Modal_product from "../components/modal_product"
 import axios from "axios"
 import Navbar from "../components/navbar"
+import getParameter from "../js/getParameter"
 import price from "../js/price"
 import { Redirect } from "react-router-dom"
 import { Swiper, SwiperSlide } from "swiper/react"
@@ -15,7 +16,7 @@ export class product extends Component {
 	constructor() {
 		super()
 		this.state = {
-			product_id: "",
+			product_id: getParameter('id'),
 			name: "",
 			price: 0,
 			stock: 0,
@@ -26,8 +27,6 @@ export class product extends Component {
 		}
 	}
 	getProduct = async () => {
-		const id = this.props.taskId
-		await this.setState({ product_id: id })
 		let url = base_url + "/product/id/" + this.state.product_id
 		axios
 			.get(url)
@@ -119,6 +118,7 @@ export class product extends Component {
 	}
 	componentDidMount() {
 		this.getProduct()
+		document.title = "produk"
 	}
 	render() {
 		if (this.state.message == "Product has been deleted") {
