@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React, { useState, useEffect } from "react"
 import Navbar from "../components/navbar"
 import Card from "../components/card"
 import Modal_product from "../components/modal_product"
@@ -7,33 +7,24 @@ import { base_url } from "../js/config"
 import axios from "axios"
 import $ from "jquery"
 
-export class price_list extends Component {
-	constructor() {
-		super()
-		this.state = {
-			products: [],
-			product: null,
-			message: "",
-			action: "insert",
-			keyword: "",
-			name: "",
-			price: 0,
-			stock: 0,
-			barcode: "",
-			image: null,
-			images_name: [],
-			// numberOfFiles: 1,
-		}
-		console.log(process.env,base_url)
-	}
-	getMessage = () => {
+const Price_list = () => {
+	const [state_products, set_state_products] = useState([])
+	const [state_message, set_state_message] = useState("")
+	const [state_keyword, set_state_keyword] = useState("")
+	const [state_name, set_state_name] = useState("")
+	const [state_price, set_state_price] = useState(0)
+	const [state_stock, set_state_stock] = useState(0)
+	const [state_barcode, set_state_barcode] = useState("")
+	const [state_image, set_state_image] = useState(null)
+
+	const getMessage = () => {
 		const message = sessionStorage.getItem("message")
 		if (message) {
-			this.setState({ message })
+			set_state_message(message)
 			sessionStorage.removeItem("message")
 		}
 	}
-	getProducts = async (keyword) => {
+	const getProducts = async (keyword) => {
 		let url
 		if (!keyword) {
 			url = base_url + "/product"
@@ -43,35 +34,38 @@ export class price_list extends Component {
 		axios
 			.get(url)
 			.then((response) => {
-				this.setState({ products: response.data.products })
+				set_state_products(response.data.products)
 			})
 			.catch((error) => {
 				console.log(error)
 			})
 	}
-	search = async (event) => {
-		await this.setState({ keyword: event.target.value })
-		this.getProducts(this.state.keyword)
+	const search = async (event) => {
+		await set_state_keyword(event.target.value)
+		getProducts(state_keyword)
 	}
-	Add = () => {
+	const Add = () => {
 		$("#modal_product").modal("show")
 		$("input:file").val(null)
-		this.setState({ name: "", price: 0, stock: 0, barcode: "" })
+		set_state_name("")
+		set_state_price(0)
+		set_state_stock(0)
+		set_state_barcode("")
 	}
-	saveProduct = (event) => {
+	const saveProduct = (event) => {
 		event.preventDefault()
 		$("#modal_product").modal("hide")
 		let form = new FormData()
-		form.append("name", this.state.name)
-		form.append("price", this.state.price)
-		if (this.state.stock != 0 && this.state.stock != "") {
-			form.append("stock", this.state.stock)
+		form.append("name", state_name)
+		form.append("price", state_price)
+		if (state_stock != 0 && state_stock != "") {
+			form.append("stock", state_stock)
 		}
-		if (this.state.barcode != "") {
-			form.append("barcode", this.state.barcode)
+		if (state_barcode != "") {
+			form.append("barcode", state_barcode)
 		}
-		if (this.state.image != null) {
-			form.append("image", this.state.image)
+		if (state_image != null) {
+			form.append("image", state_image)
 		}
 		console.log(form)
 
@@ -79,127 +73,126 @@ export class price_list extends Component {
 		axios
 			.post(url, form)
 			.then((response) => {
-				this.setState({ message: response.data.message, image: null })
+				set_state_message(response.data.message)
+				set_state_image(null)
 				$("input:file").val(null)
-				this.getProducts()
+				getProducts()
 			})
 			.catch((error) => console.log(error))
 	}
 
-	componentDidMount() {
-		this.getProducts()
-		this.getMessage()
-		document.title = 'List Produk'
-	}
-	render() {
-		return (
-			<div>
-				<Navbar active='0' />
-				<div className='row justify-content-between align-items-center mt-3'>
-					<div className='col-4 pl-3'>
-						<h3 className='text-bold text-info ml-4'>Daftar Harga</h3>
-					</div>
-					<div className='col-2'>
-						<button
-							type='button'
-							class='btn btn-success'
-							onClick={(ev) => this.Add(ev)}
-						>
-							Tambah Data
-						</button>
-					</div>
-					<div className='col-4 mr-3'>
-						<div class='input-group'>
-							<input
-								autoFocus
-								type='text'
-								class='form-control'
-								placeholder='Cari Produk ................'
-								aria-label='Cari Produk ................'
-								aria-describedby='button-addon2'
-								onKeyUp={(ev) => this.search(ev)}
-								id='search_form'
-								style={{ ":focus": { outline: "none" } }}
-							/>
-							<div class='input-group-append'>
-								<button
-									class='btn btn-outline-secondary'
-									type='button'
-									id='button-addon2'
-									style={{ height: "95%" }}
-								>
-									<img
-										src={process.env.PUBLIC_URL + "/search.svg"}
-										alt='search'
-										style={{ objectFit: "cover" }}
-									/>
-								</button>
-							</div>
+	useEffect(() => {
+		getProducts()
+		getMessage()
+		document.title = "List Produk"
+	})
+	return (
+		<div>
+			<Navbar active='0' />
+			<div className='row justify-content-between align-items-center mt-3'>
+				<div className='col-4 pl-3'>
+					<h3 className='text-bold text-info ml-4'>Daftar Harga</h3>
+				</div>
+				<div className='col-2'>
+					<button
+						type='button'
+						class='btn btn-success'
+						onClick={(ev) => Add(ev)}
+					>
+						Tambah Data
+					</button>
+				</div>
+				<div className='col-4 mr-3'>
+					<div class='input-group'>
+						<input
+							autoFocus
+							type='text'
+							class='form-control'
+							placeholder='Cari Produk ................'
+							aria-label='Cari Produk ................'
+							aria-describedby='button-addon2'
+							onKeyUp={(ev) => search(ev)}
+							id='search_form'
+							style={{ ":focus": { outline: "none" } }}
+						/>
+						<div class='input-group-append'>
+							<button
+								class='btn btn-outline-secondary'
+								type='button'
+								id='button-addon2'
+								style={{ height: "95%" }}
+							>
+								<img
+									src={process.env.PUBLIC_URL + "/search.svg"}
+									alt='search'
+									style={{ objectFit: "cover" }}
+								/>
+							</button>
 						</div>
 					</div>
 				</div>
-				{(() => {
-					if (this.state.message != "") {
-						return (
-							<div className='container mt-2'>
-								<div className='row'>
-									<div className='col-6'>
-										<div
-											class='alert alert-primary alert-dismissible'
-											role='alert'
+			</div>
+			{(() => {
+				if (state_message != "") {
+					return (
+						<div className='container mt-2'>
+							<div className='row'>
+								<div className='col-6'>
+									<div
+										class='alert alert-primary alert-dismissible'
+										role='alert'
+									>
+										{state_message}
+										<button
+											type='button'
+											class='close'
+											data-dismiss='alert'
+											aria-label='Close'
 										>
-											{this.state.message}
-											<button
-												type='button'
-												class='close'
-												data-dismiss='alert'
-												aria-label='Close'
-											>
-												<span aria-hidden='true'>&times;</span>
-											</button>
-										</div>
+											<span aria-hidden='true'>&times;</span>
+										</button>
 									</div>
 								</div>
 							</div>
-						)
-					}
-				})()}
-				<div className='container p-3'>
-					<div className='row'>
-						{this.state.products.map((item) => (
-							<div className='col-4'>
-								<Card
-									name={item.name}
-									price={price(item.price.toString())}
-									image={item.image[0] ? item.image[0] : "../no_data.svg"}
-									details={() => {
-										if(process.env.REACT_APP_ROUTER === "Hash"){
-											window.location = `?id=${item._id}#/product`
-										}else{
-											window.location = `/product?id=${item._id}`
-										}
-									}}
-								/>
-							</div>
-						))}
-					</div>
+						</div>
+					)
+				}
+			})()}
+			<div className='container p-3'>
+				<div className='row'>
+					{state_products.map((item) => (
+						<div className='col-4'>
+							<Card
+								name={item.name}
+								price={price(item.price.toString())}
+								image={item.image[0] ? item.image[0] : "../no_data.svg"}
+								details={() => {
+									if (process.env.REACT_APP_ROUTER === "Hash") {
+										window.location = `?id=${item._id}#/product`
+									} else {
+										window.location = `/product?id=${item._id}`
+									}
+								}}
+							/>
+						</div>
+					))}
 				</div>
-				<Modal_product
-					onSubmit={(ev) => this.saveProduct(ev)}
-					onChangeName={(ev) => this.setState({ name: ev.target.value })}
-					onChangePrice={(ev) => this.setState({ price: ev.target.value })}
-					onChangeStock={(ev) => this.setState({ stock: ev.target.value })}
-					onChangeBarcode={(ev) => this.setState({ barcode: ev.target.value })}
-					onChangeImage={(ev) => this.setState({ image: ev.target.files[0] })}
-					name={this.state.name}
-					price={this.state.price}
-					stock={this.state.stock}
-					barcode={this.state.barcode}
-					action={this.state.action}
-				/>
 			</div>
-		)
-	}
+			<Modal_product
+				onSubmit={(ev) => saveProduct(ev)}
+				onChangeName={(ev) => set_state_name(ev.target.value)}
+				onChangePrice={(ev) => set_state_price(ev.target.value)}
+				onChangeStock={(ev) => set_state_stock(ev.target.value)}
+				onChangeBarcode={(ev) => set_state_barcode(ev.target.value)}
+				onChangeImage={(ev) => set_state_image(ev.target.files[0])}
+				name={state_name}
+				price={state_price}
+				stock={state_stock}
+				barcode={state_barcode}
+				action={"insert"}
+			/>
+		</div>
+	)
 }
 
-export default price_list
+export default Price_list

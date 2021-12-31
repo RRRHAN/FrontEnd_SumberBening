@@ -1,9 +1,10 @@
-import React, { Component } from "react"
+import React, { useState, useEffect } from "react"
 import { base_url } from "../js/config"
 import $, { error } from "jquery"
 import Modal_product from "../components/modal_product"
 import axios from "axios"
 import Navbar from "../components/navbar"
+import ConfirmModal from "../components/ConfirmModal"
 import getParameter from "../js/getParameter"
 import price from "../js/price"
 import { Redirect } from "react-router-dom"
@@ -12,119 +13,119 @@ import "swiper/swiper-bundle.css"
 import SwiperCore, { Navigation, Pagination } from "swiper"
 SwiperCore.use([Navigation, Pagination])
 
-export class product extends Component {
-	constructor() {
-		super()
-		this.state = {
-			product_id: getParameter('id'),
-			name: "",
-			price: 0,
-			stock: 0,
-			barcode: "",
-			image_name: [],
-			image: null,
-			message: "",
-		}
-	}
-	getProduct = async () => {
-		let url = base_url + "/product/id/" + this.state.product_id
+const Product = () => {
+	const [state_product_id, set_state_product_id] = useState(getParameter("id"))
+	const [state_name, set_state_name] = useState("")
+	const [state_price, set_state_price] = useState(0)
+	const [state_stock, set_state_stock] = useState(0)
+	const [state_barcode, set_state_barcode] = useState("")
+	const [state_image_name, set_state_image_name] = useState([])
+	const [state_image, set_state_image] = useState(null)
+	const [state_message, set_state_message] = useState("")
+	const [state_confirm_modal, set_state_confirm_modal] = useState({})
+
+	const getProduct = async () => {
+		let url = base_url + "/product/id/" + state_product_id
 		axios
 			.get(url)
 			.then((response) => {
-				this.setState({
-					name: response.data.product.name,
-					price: response.data.product.price,
-					stock: response.data.product.stock,
-					barcode: response.data.product.barcode,
-				})
+				set_state_name(response.data.product.name)
+				set_state_price(response.data.product.price)
+				set_state_stock(response.data.product.stock)
+				set_state_barcode(response.data.product.barcode)
 				if (response.data.product.image.length === 0) {
-					this.setState({ image_name: ["../no_data.svg"] })
+					set_state_image_name(["../no_data.svg"])
 				} else if (response.data.product.image.length != 0) {
-					this.setState({ image_name: response.data.product.image })
+					set_state_image_name(response.data.product.image)
 				}
 			})
 			.catch((error) => {
 				console.error(error)
 			})
 	}
-	addImage = (ev) => {
+	const addImage = (ev) => {
 		ev.preventDefault()
 		const url = base_url + "/product/image"
 		let form = new FormData()
-		form.append("product_id", this.state.product_id)
-		form.append("image", this.state.image)
+		form.append("product_id", state_product_id)
+		form.append("image", state_image)
 		axios
 			.post(url, form)
 			.then((response) => {
-				this.setState({ message: response.data.message })
-				this.getProduct()
+				set_state_message(response.data.message)
+				getProduct()
 			})
 			.catch((error) => console.error(error))
 		$("#modal_image").modal("hide")
 	}
-	deleteImage = (item) => {
-		if (window.confirm("apakah anda yakin akan menghapus foto ini?")) {
-			const url = base_url + "/product/image",
-				data = { product_id: this.state.product_id, image: item }
-			axios
-				.delete(url, { data })
-				.then((response) => {
-					this.setState({ message: response.data.message })
-					this.getProduct()
-				})
-				.catch((error) => {
-					console.error(error)
-				})
-		}
+	const deleteImage = (item) => {
+		const url = base_url + "/product/image",
+			data = { product_id: state_product_id, image: item }
+		axios
+			.delete(url, { data })
+			.then((response) => {
+				set_state_message(response.data.message)
+				getProduct()
+			})
+			.catch((error) => {
+				console.error(error)
+			})
 	}
-	deleteProduct = () => {
-		if (window.confirm("Apakah Anda Yakin Ingin Menghapus Produk Ini?")) {
-			const url = base_url + "/product"
-			axios
-				.delete(url, { data: { product_id: this.state.product_id } })
-				.then((response) => {
-					this.setState({ message: response.data.message })
-				})
-				.catch((error) => console.error(error))
-		}
+	const deleteProduct = () => {
+		const url = base_url + "/product"
+		axios
+			.delete(url, { data: { product_id: state_product_id } })
+			.then((response) => {
+				set_state_message(response.data.message)
+			})
+			.catch((error) => console.error(error))
 	}
-	productDeleted = () => {
-		sessionStorage.setItem("message", this.state.message)
-		return <Redirect to='/' />
+	const productDeleted = () => {
+		sessionStorage.setItem("message", state_message)
+		return <Redirect to={()=>{
+			if(process.env.REACT_APP_ROUTER === "Hash"){
+				window.location = `?id=#/`
+			}else{
+				window.location = `/`
+			}
+		}} />
 	}
-	saveProduct = (event) => {
+	const saveProduct = (event) => {
 		event.preventDefault()
 		$("#modal_product").modal("hide")
 		let form = {
-			product_id: this.state.product_id,
-			name: this.state.name,
-			price: this.state.price,
+			product_id: state_product_id,
+			name: state_name,
+			price: state_price,
 		}
 
-		if (this.state.stock != 0 && this.state.stock != "") {
-			form.stock = this.state.stock
+		if (state_stock != 0 && state_stock != "") {
+			form.stock = state_stock
 		}
-		if (this.state.barcode != "") {
-			form.barcode = this.state.barcode
+		if (state_barcode != "") {
+			form.barcode = state_barcode
 		}
 		let url = base_url + "/product"
 		axios
 			.put(url, form)
 			.then((response) => {
-				this.setState({ message: response.data.message })
-				this.getProduct()
+				set_state_message(response.data.message)
+				getProduct()
 			})
 			.catch((error) => console.error(error))
 	}
-	componentDidMount() {
-		this.getProduct()
+	useEffect(() => {
+		getProduct()
 		document.title = "produk"
-	}
-	render() {
-		if (this.state.message == "Product has been deleted") {
-			return this.productDeleted()
-		}
-		return (
+	}, [])
+
+	return (
+		<>
+			{(() => {
+				if (state_message == "Product has been deleted") {
+					return productDeleted()
+				}
+			})()}
 			<div
 				className='bg-light'
 				style={{
@@ -134,7 +135,7 @@ export class product extends Component {
 				<Navbar />
 				<div className='container'>
 					{(() => {
-						if (this.state.message != "") {
+						if (state_message != "") {
 							return (
 								<div className='container mt-3'>
 									<div className='row'>
@@ -143,7 +144,7 @@ export class product extends Component {
 												class='alert alert-primary alert-dismissible'
 												role='alert'
 											>
-												{this.state.message}
+												{state_message}
 												<button
 													type='button'
 													class='close'
@@ -160,7 +161,7 @@ export class product extends Component {
 						}
 					})()}
 					<div className='row mt-3'>
-						{/* <h1>{this.state.name}</h1> */}
+						{/* <h1>{state_name}</h1> */}
 						<div className='col-4 p-2 border border-dark rounded'>
 							<Swiper
 								spaceBetween={1}
@@ -173,7 +174,7 @@ export class product extends Component {
 								// onSwiper={(swiper) => console.log(swiper)}
 								// onSlideChange={() => console.log("slide change")}
 							>
-								{this.state.image_name.map((item, index) => (
+								{state_image_name.map((item, index) => (
 									<div>
 										<SwiperSlide className='d-flex align-content-center flex-wrap'>
 											{/* <div
@@ -185,7 +186,7 @@ export class product extends Component {
 											> */}
 											<div className='align-self-center'>
 												{(() => {
-													if (this.state.image_name[0] != "../no_data.svg") {
+													if (state_image_name[0] != "../no_data.svg") {
 														return (
 															<button
 																className='btn btn-danger position-absolute p-2'
@@ -193,7 +194,14 @@ export class product extends Component {
 																	top: "1%",
 																	left: "1%",
 																}}
-																onClick={() => this.deleteImage(item)}
+																onClick={() => {
+																	$("#confirmModal").modal("show")
+																	set_state_confirm_modal({
+																		message:
+																			"apakah anda yakin akan menghapus foto ini?",
+																		action: () => deleteImage(item),
+																	})
+																}}
 																title='Hapus Foto Ini'
 															>
 																<img
@@ -231,15 +239,12 @@ export class product extends Component {
 									fontSize: "4rem",
 								}}
 							>
-								{this.state.name}
+								{state_name}
 							</h1>
-							<h4 className='mb-3'>Rp. {price(this.state.price)}</h4>
+							<h4 className='mb-3'>Rp. {price(state_price.toString())}</h4>
+							<h6>Stok : {state_stock == undefined ? "-" : state_stock}</h6>
 							<h6>
-								Stok : {this.state.stock == undefined ? "-" : this.state.stock}
-							</h6>
-							<h6>
-								Barcode :{" "}
-								{this.state.barcode == undefined ? "-" : this.state.barcode}
+								Barcode : {state_barcode == undefined ? "-" : state_barcode}
 							</h6>
 							<button
 								type='button'
@@ -268,7 +273,13 @@ export class product extends Component {
 							<button
 								type='button'
 								class='btn btn-danger mt-3 d-block'
-								onClick={() => this.deleteProduct()}
+								onClick={() => {
+									$("#confirmModal").modal("show")
+									set_state_confirm_modal({
+										message: "Apakah Anda Yakin Ingin Menghapus Produk Ini?",
+										action: () => deleteProduct(),
+									})
+								}}
 							>
 								Hapus Produk{" "}
 								<img
@@ -306,15 +317,13 @@ export class product extends Component {
 								</button>
 							</div>
 							<div class='modal-body'>
-								<form onSubmit={(ev) => this.addImage(ev)}>
+								<form onSubmit={(ev) => addImage(ev)}>
 									Gambar
 									<input
 										type='file'
 										multiple
 										className='form-control mb-1'
-										onChange={(ev) =>
-											this.setState({ image: ev.target.files[0] })
-										}
+										onChange={(ev) => set_state_image(ev.target.files[0])}
 									/>
 									<div class='modal-footer'>
 										<button type='submit' className='btn btn-block btn-success'>
@@ -327,21 +336,24 @@ export class product extends Component {
 					</div>
 				</div>
 				<Modal_product
-					onSubmit={(ev) => this.saveProduct(ev)}
-					onChangeName={(ev) => this.setState({ name: ev.target.value })}
-					onChangePrice={(ev) => this.setState({ price: ev.target.value })}
-					onChangeStock={(ev) => this.setState({ stock: ev.target.value })}
-					onChangeBarcode={(ev) => this.setState({ barcode: ev.target.value })}
-					onChangeImage={(ev) => this.setState({ image: ev.target.files })}
-					name={this.state.name}
-					price={this.state.price}
-					stock={this.state.stock}
-					barcode={this.state.barcode}
-					action={this.state.action}
+					onSubmit={(ev) => saveProduct(ev)}
+					onChangeName={(ev) => set_state_name(ev.target.value)}
+					onChangePrice={(ev) => set_state_price(ev.target.value)}
+					onChangeStock={(ev) => set_state_stock(ev.target.value)}
+					onChangeBarcode={(ev) => set_state_barcode(ev.target.value)}
+					onChangeImage={(ev) => set_state_image(ev.target.files)}
+					name={state_name}
+					price={state_price}
+					stock={state_stock}
+					barcode={state_barcode}
+				/>
+				<ConfirmModal
+					message={state_confirm_modal.message}
+					action={state_confirm_modal.action}
 				/>
 			</div>
-		)
-	}
+		</>
+	)
 }
 
-export default product
+export default Product

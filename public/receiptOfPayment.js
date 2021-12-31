@@ -97,9 +97,10 @@ setReceipt = (transactionData) => {
 		Number(date.getMonth()) + 1
 	}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 
-    // send message when document is ready to print
-    window.parent.postMessage("documentReady", '*')
-    if (getParameter("print") == 'true') {
-        window.print()
-    }
+    // if (getParameter("print") == 'true') {
+    window.print()
+        // } else {
+        //     // send message when document is ready to print
+        //     window.parent.postMessage("documentReady", '*')
+        // }
 }

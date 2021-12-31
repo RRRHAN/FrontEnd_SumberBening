@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React, { useState, useEffect } from "react"
 import Navbar from "../components/navbar"
 import { base_url } from "../js/config"
 import axios from "axios"
@@ -6,132 +6,126 @@ import TransactionList from "../components/transactionList"
 import ModalDetailTransaction from "../components/modalDetailTransaction"
 import $ from "jquery"
 
-export class transaction_list extends Component {
-	constructor() {
-		super()
-		this.state = {
-			message: "",
-			transactions: [
+const Transaction_list = () => {
+	const [state_message, set_state_message] = useState("")
+	const [state_transactions, set_state_transactions] = useState([
+		{
+			customer: {
+				name: "",
+				phone: "",
+				address: "",
+			},
+			_id: "",
+			products: [
 				{
-					customer: {
-						name: "",
-						phone: "",
-						address: "",
-					},
-					_id: "",
-					products: [
-						{
-							name: "",
-							price: 0,
-							product_id: "",
-							amount: 0,
-						},
-					],
-					date: "",
+					name: "",
+					price: 0,
+					product_id: "",
+					amount: 0,
 				},
 			],
-			transaction: {
-				customer: {
-					name: "",
-					phone: "",
-					address: "",
-				},
-				_id: "",
-				products: [
-					{
-						name: "",
-						price: 0,
-						product_id: "",
-						amount: 0,
-					},
-				],
-				date: "",
+			date: "",
+		},
+	])
+	const [state_transaction, set_state_transaction] = useState({
+		customer: {
+			name: "",
+			phone: "",
+			address: "",
+		},
+		_id: "",
+		products: [
+			{
+				name: "",
+				price: 0,
+				product_id: "",
+				amount: 0,
 			},
-		}
-	}
-	getTransaction = () => {
+		],
+		date: "",
+	})
+
+	const getTransaction = () => {
 		let url = base_url + "/transaction"
 		axios
 			.get(url)
 			.then((response) => {
-				this.setState({ transactions: response.data.transactions })
+				set_state_transactions(response.data.transactions)
 				console.log(response.data)
 			})
 			.catch((error) => {
 				console.error(error)
 			})
 	}
-	showDetail = (i) => {
+	const showDetail = (i) => {
 		$("#modalDetail").modal("show")
-		this.setState({ transaction: this.state.transactions[i] })
+		set_state_transaction(state_transactions[i] )
 	}
-	getMessage = () => {
+	const getMessage = () => {
 		const message = sessionStorage.getItem("message")
 		if (message) {
-			this.setState({ message })
+			set_state_message(message)
 			sessionStorage.removeItem("message")
 		}
 	}
-	componentDidMount() {
-		this.getTransaction()
-		this.getMessage()
-		document.title = 'List Transaksi'
-	}
+	useEffect(() => {
+		getTransaction()
+		getMessage()
+		document.title = "List Transaksi"
+	})
 
-	render() {
-		return (
-			<div>
-				<Navbar active='2' />
-				<h3 className='text-bold text-info m-2 ml-5'>Daftar Transaksi</h3>
-				{(() => {
-					if (this.state.message != "") {
-						return (
-							<div className='container mt-2'>
-								<div className='row'>
-									<div className='col-6'>
-										<div
-											class='alert alert-primary alert-dismissible'
-											role='alert'
+	return (
+		<div>
+			<Navbar active='2' />
+			<h3 className='text-bold text-info m-2 ml-5'>Daftar Transaksi</h3>
+			{(() => {
+				if (state_message != "") {
+					return (
+						<div className='container mt-2'>
+							<div className='row'>
+								<div className='col-6'>
+									<div
+										class='alert alert-primary alert-dismissible'
+										role='alert'
+									>
+										{state_message}
+										<button
+											type='button'
+											class='close'
+											data-dismiss='alert'
+											aria-label='Close'
 										>
-											{this.state.message}
-											<button
-												type='button'
-												class='close'
-												data-dismiss='alert'
-												aria-label='Close'
-											>
-												<span aria-hidden='true'>&times;</span>
-											</button>
-										</div>
+											<span aria-hidden='true'>&times;</span>
+										</button>
 									</div>
 								</div>
 							</div>
-						)
-					}
-				})()}
-				<div className='container'>
-					{this.state.transactions.map((item, i) => (
-						<TransactionList
-							name={item.customer.name}
-							address={item.customer.address}
-							phone={item.customer.phone}
-							products={item.products}
-							date={item.date}
-							detail={() => this.showDetail(i)}
-						/>
-					))}
-				</div>
-				<ModalDetailTransaction
-					transaction={this.state.transaction}
-					deleteTransaction={(message) => {
-						this.setState({ message })
-						this.getTransaction()
-						$("#modalDetail").modal("hide")
-					}}
-				/>
+						</div>
+					)
+				}
+			})()}
+			<div className='container'>
+				{state_transactions.map((item, i) => (
+					<TransactionList
+						name={item.customer.name}
+						address={item.customer.address}
+						phone={item.customer.phone}
+						products={item.products}
+						date={item.date}
+						detail={() => showDetail(i)}
+					/>
+				))}
 			</div>
-		)
-	}
+			<ModalDetailTransaction
+				transaction={state_transaction}
+				deleteTransaction={(message) => {
+					set_state_message(message) 
+					getTransaction()
+					$("#modalDetail").modal("hide")
+				}}
+			/>
+		</div>
+	)
 }
 
-export default transaction_list
+export default Transaction_list

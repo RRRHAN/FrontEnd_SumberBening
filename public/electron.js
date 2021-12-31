@@ -9,8 +9,10 @@ const isDev = !app.isPackaged
 let mainWindow;
 
 function createWindow() {
-    mainWindow = new BrowserWindow({ width: 900, height: 680 });
-    mainWindow.loadURL(isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`);
+    mainWindow = new BrowserWindow({ show: false, icon: './favicon.ico' });
+    mainWindow.maximize()
+    mainWindow.loadURL(isDev ? 'http://localhost:3131' : `file://${path.join(__dirname, '../build/index.html')}`);
+    mainWindow.show()
     mainWindow.on('closed', () => mainWindow = null);
 }
 
